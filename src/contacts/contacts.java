@@ -1,17 +1,18 @@
-
-
 package contacts;
+import com.sun.jdi.Value;
 import util.Input;
 
+import java.awt.*;
+import java.security.Key;
+import java.util.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-
-
 public class contacts {
+ //   ArrayList<String> = new ArrayList<String>();
     static Input input = new Input();
     static String directory = "src/contacts";
     static String filename = "contacts.txt";
@@ -22,11 +23,12 @@ public class contacts {
     }
 
     public static void start() {
-        System.out.println("");
+
         menu();
     }
 
     public static void menu() {
+
 
         System.out.println("Please select an option");
         System.out.println("1 - View contacts");
@@ -57,11 +59,15 @@ public class contacts {
             }
 
         }
-//        else {
-//            System.out.println("");
-//            System.exit(0);
-//        }
-
+//Search a contact by name
+        if(selection == 3){
+            try{
+                toMap(L);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+//Deletes a contact
         if(selection == 4){
             try{
                 deleteItem();
@@ -69,10 +75,10 @@ public class contacts {
                 e.printStackTrace();
             }
         }
-
+//Exits the program
         if(selection == 5){
-            System.out.println("");
-           System.exit(0);
+            System.out.println("Bye");
+            System.exit(0);
         }
 
     }
@@ -80,15 +86,18 @@ public class contacts {
     public static void showItems() throws IOException {
         // We use Paths.get to get a Java Path object
         Path contactsPath = Paths.get("src/contacts", "contacts.txt");
-
+        // if the file does not exist, then create it
+        if(Files.notExists(contactsPath)) {
+            Files.createFile(contactsPath);
+        }
         // .readAllLines returns a List type
-        List<String> contacts = Files.readAllLines(contactsPath);
+        List<String> Contact = Files.readAllLines(contactsPath);
 
         System.out.println("Name | Phone Number");
         System.out.println("-------------------");
 
-        for(String item : contacts) {
-            System.out.println(item);
+        for(String name : Contact) {
+            System.out.println(name);
         }
         System.out.println();
 
@@ -107,17 +116,29 @@ public class contacts {
         }
 
 //         assigns lines to hold all of the strings already in the file
-        List<String> lines = Files.readAllLines(Paths.get(directory, filename));
+        List<String> Contact = Files.readAllLines(Paths.get(directory, filename));
 
-        String item = input.getString("Please enter a new contact:");
+        String name = input.getString("Please enter a new contact:");
         String phoneNumber = input.getString("Please enter a phone number:");
+//        String number = scan.getString();
+        phoneNumber = "(" + phoneNumber.substring( 0,3 ) + ") " + phoneNumber.substring( 3,6 ) + "-" + phoneNumber.substring( 6,10 );
 
-        lines.add(item + " | " + phoneNumber);
+        Contact.add(name + " | " + phoneNumber);
 
-        Files.write(contactsPath, lines);
+        Files.write(contactsPath, Contact);
 
         menu();
     }
+
+    public static void toMap() throws IOException{
+        List<String> Contact = new ArrayList<>(Files.readAllLines(Paths.get(directory, filename)));
+        HashMap<String, String> ContactMap = new HashMap<>();
+        for(int i = 0; i < Contact.size(); i++){
+            ContactMap.put(String.valueOf(i), Contact.get(i));
+        }
+        System.out.println(ContactMap);
+    }
+
 
     public static void deleteItem() throws IOException {
 
@@ -127,13 +148,23 @@ public class contacts {
             Files.createFile(contactsPath);
         }
 
-        List<String> lines = Files.readAllLines(Paths.get(directory, filename));
+       List<String> Contact = Files.readAllLines(Paths.get(directory, filename));
+        HashMap<String, String> ContactMap = new HashMap<>();
+        for(int i = 0; i < Contact.size(); i++){
+            ContactMap.put(String.valueOf(i), Contact.get(i));
+        }
+        String name = input.getString("Please enter a contact to remove:");
 
-        String item = input.getString("Please enter a contact to remove:");
-
-        lines.remove(item);
-
-        Files.write(contactsPath, lines);
+     if(ContactMap.containsKey(name)) {
+         ContactMap.remove(name);
+         System.out.println("Contact Removed");
+         Contact = new ArrayList<>(ContactMap.keySet());
+          Contact = new ArrayList<>(ContactMap.values());
+     }
+     else {
+         System.out.println("Invalid contact name");
+     }
+        Files.write(contactsPath, Contact);
 
         menu();
     }
